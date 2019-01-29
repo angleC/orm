@@ -75,7 +75,14 @@ namespace MicroDust.Core
             string whereStr = whereParam.Item1;
             this.sqlParameters = whereParam.Item2;
 
-            this.sbSql.Append($"{selectStr} WHERE {whereStr}");
+            if (!string.IsNullOrEmpty(whereStr))
+            {
+                this.sbSql.Append($"{selectStr} WHERE {whereStr}");
+            }
+            else
+            {
+                this.sbSql.Append($"{selectStr}");
+            }
 
             return this;
         }
@@ -86,6 +93,11 @@ namespace MicroDust.Core
         /// <returns></returns>
         public SQL<TSource> FindByKey(object value)
         {
+            if (null == value)
+            {
+                new MicroDustException("参数不能为NULL");
+            }
+
             string selectStr = ModelConvertor.ConvertToSelectSql<TSource>();
             string key = this.GetKeyName();
 
@@ -283,6 +295,10 @@ namespace MicroDust.Core
                     throw new MicroDustException("无法找到主键标识属性");
                 }
             }
+            if (null == value)
+            {
+                throw new MicroDustException("value不能为NULL");
+            }
             string deleteStr = ModelConvertor.ConvertToDeleteSql<TSource>();
             string whereStr = $"{key} = @{key}";
 
@@ -376,7 +392,14 @@ namespace MicroDust.Core
                 this.sqlParameters.Add(new SqlParameter($"@{key}", value));
             }
 
-            this.sbSql.Append($"{updateStr} {sbUpdateField.ToString()} WHERE {whereStr}");
+            if (!string.IsNullOrEmpty(whereStr))
+            {
+                this.sbSql.Append($"{updateStr} {sbUpdateField.ToString()} WHERE {whereStr}");
+            }
+            else
+            {
+                this.sbSql.Append($"{updateStr} {sbUpdateField.ToString()}");
+            }
 
             return this;
         }
@@ -417,7 +440,14 @@ namespace MicroDust.Core
                 sbUpdateField.Remove(sbUpdateField.Length - 1, 1);
             }
 
-            this.sbSql.Append($"{updateStr} {sbUpdateField.ToString()} WHERE {whereStr}");
+            if (!string.IsNullOrEmpty(whereStr))
+            {
+                this.sbSql.Append($"{updateStr} {sbUpdateField.ToString()} WHERE {whereStr}");
+            }
+            else
+            {
+                this.sbSql.Append($"{updateStr} {sbUpdateField.ToString()}");
+            }
 
             return this;
         }
