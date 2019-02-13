@@ -30,6 +30,22 @@ namespace MicroDust.Attribute
             return columnName;
         }
         /// <summary>
+        /// 是否忽略列
+        /// </summary>
+        /// <param name="propertyInfo">属性信息</param>
+        /// <returns>是否忽略</returns>
+        public static bool ColumnIsIgnore(this PropertyInfo propertyInfo)
+        {
+            if (propertyInfo.IsDefined(typeof(ColumnAttribute), true))
+            {
+                ColumnAttribute column = propertyInfo.GetCustomAttributes<ColumnAttribute>().FirstOrDefault();
+
+                return column.IsIgnore;
+            }
+
+            return false;
+        }
+        /// <summary>
         /// 获取类上标记的表别称
         /// </summary>
         /// <param name="type">类型</param>

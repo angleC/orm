@@ -13,6 +13,8 @@ namespace ORM.MicroDust.Test.Console.Model
         public bool Sex { get; set; }
         public int Status { get; set; }
         public int Age { get; set; }
+        [Column(true)]
+        public bool IsResult { get; set; }
         public DateTime? DtCreate { get; set; }
     }
 }

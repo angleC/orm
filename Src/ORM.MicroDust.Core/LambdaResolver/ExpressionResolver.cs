@@ -103,7 +103,6 @@ namespace MicroDust.Core.LambdaResolver
                 case ExpressionType.MemberAccess:
                     dataMember = this.ResolveMember((MemberExpression)exp);
                     break;
-
                 case ExpressionType.Call:
                     dataMember = this.ResolveMethodCall((MethodCallExpression)exp);
                     break;

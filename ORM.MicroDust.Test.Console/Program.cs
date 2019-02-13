@@ -1,8 +1,10 @@
 ﻿using MicroDust.Core;
+using Newtonsoft.Json;
 using ORM.MicroDust.Test.Console.FuncTest;
 using ORM.MicroDust.Test.Console.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ORM.MicroDust.Test.Console
 {
@@ -37,38 +39,38 @@ namespace ORM.MicroDust.Test.Console
             //    Name = "纷纷"
             //}, "5ae1e315-1f72-4455-bde4-bffd5f57253c");
             List<UserModel> users2 = new List<UserModel>();
-            //using (DBSqlTransaction tran = ORMDbContext.Singleton.DBSqlTransaction)
-            //{
-            //    string g = Guid.NewGuid().ToString();
+            using (DBSqlTransaction tran = ORMDbContext.Singleton.DBSqlTransaction)
+            {
+                string g = Guid.NewGuid().ToString();
 
-            //    User uTest1 = new User
-            //    {
-            //        DtCreate = DateTime.Now,
-            //        Name = "机器人0",
-            //        ID = g,
-            //        Sex = false,
-            //        Status = 3
-            //    };
-            //    User uTest2 = new User
-            //    {
-            //        DtCreate = DateTime.Now,
-            //        Name = "机器人0",
-            //        ID = Guid.NewGuid().ToString(),
-            //        Sex = false,
-            //        Status = 3
-            //    };
-            //    tran.Add<User>(uTest1);
-            //    tran.Add<User>(uTest2);
-            //    tran.Update<User>(new
-            //    {
-            //        Name = "纷纷"
-            //    }, "80f73aaf-d299-49d8-ac55-68510bb5bd1e");
+                UserModel uTest1 = new UserModel
+                {
+                    DtCreate = DateTime.Now,
+                    Name = "机器人0",
+                    IDKey = g,
+                    Sex = false,
+                    Status = 3
+                };
+                UserModel uTest2 = new UserModel
+                {
+                    DtCreate = DateTime.Now,
+                    Name = "机器人0",
+                    IDKey = Guid.NewGuid().ToString(),
+                    Sex = false,
+                    Status = 3
+                };
+                tran.Add<UserModel>(uTest1);
+                tran.Add<UserModel>(uTest2);
+                tran.Update<UserModel>(new
+                {
+                    Name = "纷纷"
+                }, "80f73aaf-d299-49d8-ac55-68510bb5bd1e");
 
-            //    tran.Execute();
+                tran.Execute();
 
-            //    //if (users2.Count > 2)
-            //    //    tran.Rollback();
-            //}
+                //if (users2.Count > 2)
+                //    tran.Rollback();
+            }
 
             //int fRowCount = ORMDbContext.Singleton.Increment<User>(new
             //{
@@ -77,13 +79,18 @@ namespace ORM.MicroDust.Test.Console
 
             Guid uID = Guid.Parse("80f73aaf-d299-49d8-ac55-68510bb5bd1e");
 
-            var v = ORMDbContext.Singleton.Find<UserModel>().GroupBy(t => new
-            {
-                t.Name,
-                t.Sex,
-                t.Status
-            });
-            users2 = v.ToList();
+            //var v = ORMDbContext.Singleton.Find<UserModel>().GroupBy(t => new
+            //{
+            //    t.Name,
+            //    t.Sex,
+            //    t.Status
+            //});
+            //var v = ORMDbContext.Singleton.Find<UserModel>().Select(t => new
+            //{
+            //    t.Name,
+            //    t.Sex
+            //});
+            users2 = ORMDbContext.Singleton.Find<UserModel>().ToList();
             if (null != users2)
             {
                 foreach (UserModel u in users2)

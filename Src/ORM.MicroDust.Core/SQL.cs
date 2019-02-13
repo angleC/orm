@@ -1,6 +1,8 @@
 ﻿using MicroDust.Attribute;
 using MicroDust.Core.Helper;
+using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -87,6 +89,41 @@ namespace MicroDust.Core
             return this;
         }
         /// <summary>
+        /// 选择获取项信息
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        public object Select(Func<TSource, object> selector)
+        {
+            Type type = typeof(TSource);
+            TSource ts = type.Assembly.CreateInstance(type.FullName) as TSource;
+            StringBuilder sbJson = new StringBuilder("[");
+            string columnName = string.Empty;
+
+            object obj = selector?.Invoke(ts);
+
+            DataTable dt = DBHelperExt.ExecuteDataTable(System.Data.CommandType.Text, this.sbSql.ToString(), this.sqlParameters.ToArray());
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                sbJson.Append("{");
+                foreach (PropertyInfo pi in obj.GetType().GetProperties())
+                {
+                    columnName = pi.GetColumnName();
+
+                    sbJson.Append($"\"{columnName}\":\"{dr[columnName]}\",");
+                }
+                sbJson.Remove(sbJson.Length - 1, 1);
+                sbJson.Append("},");
+            }
+
+            sbJson.Remove(sbJson.Length - 1, 1);
+            sbJson.Append("]");
+
+            return JsonConvert.DeserializeObject(sbJson.ToString());
+        }
+
+        /// <summary>
         /// 通过主键值查询
         /// </summary>
         /// <param name="value">主键值</param>
@@ -126,7 +163,10 @@ namespace MicroDust.Core
 
             foreach (PropertyInfo pi in properties)
             {
-                this.sqlParameters.Add(new SqlParameter($"@{pi.Name}", pi.GetValue(entity)));
+                if (!pi.ColumnIsIgnore())
+                {
+                    this.sqlParameters.Add(new SqlParameter($"@{pi.GetColumnName()}", pi.GetValue(entity)));
+                }
             }
 
             return this;
@@ -189,6 +229,7 @@ namespace MicroDust.Core
             string updateStr = ModelConvertor.ConvertToUpdateSql<TSource>();
             string whereStr = string.Empty;
             StringBuilder sbUpdateField = new StringBuilder();
+            string columnName = string.Empty;
 
             Type t = updateObj.GetType();
             long increment = 0;
@@ -196,12 +237,13 @@ namespace MicroDust.Core
 
             foreach (PropertyInfo pi in t.GetProperties())
             {
+                columnName = pi.GetColumnName();
                 proValue = pi.GetValue(updateObj);
                 if (null != proValue && long.TryParse(proValue.ToString(), out increment))
                 {
-                    sbUpdateField.Append($"{pi.Name}={pi.Name} + (@{pi.Name}),");
+                    sbUpdateField.Append($"{columnName}={columnName} + (@{columnName}),");
 
-                    this.sqlParameters.Add(new SqlParameter($"@{pi.Name}", increment));
+                    this.sqlParameters.Add(new SqlParameter($"@{columnName}", increment));
                 }
             }
 
@@ -362,14 +404,20 @@ namespace MicroDust.Core
             string updateStr = ModelConvertor.ConvertToUpdateSql<TSource>();
             string whereStr = string.Empty;
             StringBuilder sbUpdateField = new StringBuilder();
+            string columnName = string.Empty;
 
             Type t = updateObj.GetType();
 
             foreach (PropertyInfo pi in t.GetProperties())
             {
-                sbUpdateField.Append($"{pi.Name}=@{pi.Name},");
+                columnName = pi.GetColumnName();
 
-                this.sqlParameters.Add(new SqlParameter($"@{pi.Name}", pi.GetValue(updateObj)));
+                if (!pi.ColumnIsIgnore())
+                {
+                    sbUpdateField.Append($"{columnName}=@{columnName},");
+
+                    this.sqlParameters.Add(new SqlParameter($"@{columnName}", pi.GetValue(updateObj)));
+                }
             }
 
             if (sbUpdateField.Length > 0)
@@ -415,19 +463,21 @@ namespace MicroDust.Core
             string key = string.Empty;
             StringBuilder sbUpdateField = new StringBuilder();
             Type t = entity.GetType();
+            string columnName = string.Empty;
 
             foreach (PropertyInfo pi in t.GetProperties())
             {
+                columnName = pi.GetColumnName();
                 if (pi.IsDefined(typeof(KeyAttribute)))
                 {
                     key = pi.Name;
-                    whereStr = $"{pi.Name}=@{pi.Name}";
+                    whereStr = $"{columnName}=@{columnName}";
                 }
                 else
                 {
-                    sbUpdateField.Append($"{pi.Name}=@{pi.Name},");
+                    sbUpdateField.Append($"{columnName}=@{columnName},");
                 }
-                this.sqlParameters.Add(new SqlParameter($"@{pi.Name}", pi.GetValue(entity)));
+                this.sqlParameters.Add(new SqlParameter($"@{columnName}", pi.GetValue(entity)));
             }
 
             if (string.IsNullOrEmpty(key))
@@ -487,7 +537,10 @@ namespace MicroDust.Core
 
             foreach (PropertyInfo pi in t.GetProperties())
             {
-                sbGroupByField.Append($" {pi.GetColumnName()},");
+                if (!pi.ColumnIsIgnore())
+                {
+                    sbGroupByField.Append($" {pi.GetColumnName()},");
+                }
             }
 
             if (sbGroupByField.Length > 0)
@@ -584,7 +637,7 @@ namespace MicroDust.Core
             {
                 if (pi.IsDefined(typeof(KeyAttribute)))
                 {
-                    return pi.Name;
+                    return pi.GetColumnName();
                 }
             }
 

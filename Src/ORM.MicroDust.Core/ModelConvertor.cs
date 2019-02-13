@@ -98,8 +98,6 @@ namespace MicroDust.Core
         /// <returns></returns>
         public static string ConvertToSelectSql<T>() where T : class
         {
-            string selectSql = string.Empty;
-
             return $"SELECT {ConvertToFieldStr<T>("[", "]")} FROM [{typeof(T).GetTableName()}]";
         }
         /// <summary>
@@ -123,7 +121,7 @@ namespace MicroDust.Core
             string selectSql = string.Empty;
             Type t = typeof(T);
 
-            return $"UPDATE [{t.Name}] SET";
+            return $"UPDATE [{t.GetTableName()}] SET";
         }
         /// <summary>
         /// 根据类属性名称转换成字段字符串
@@ -137,11 +135,22 @@ namespace MicroDust.Core
         public static string ConvertToFieldStr<T>(string prefixString = "", string suffixString = "") where T : class
         {
             Type t = typeof(T);
+            StringBuilder sbFieldStr = new StringBuilder();
 
-            return string.Join(",", t.GetProperties().Select(p =>
+            foreach (PropertyInfo pi in t.GetProperties())
             {
-                return $"{prefixString}{p.GetColumnName()}{suffixString}";
-            }));
+                if (!pi.ColumnIsIgnore())
+                {
+                    sbFieldStr.Append($"{prefixString}{pi.GetColumnName()}{suffixString},");
+                }
+            }
+
+            if (sbFieldStr.Length > 0)
+            {
+                sbFieldStr.Remove(sbFieldStr.Length - 1, 1);
+            }
+
+            return sbFieldStr.ToString();
         }
         /// <summary>
         ///     获取reader存在并且在 T 类中包含同名可写属性的集合
