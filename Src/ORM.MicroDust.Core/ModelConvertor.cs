@@ -226,6 +226,20 @@ namespace MicroDust.Core
                 else
                     return false;
             }
+            else if (type.FullName == typeof(DateTime?).FullName)
+            {
+                if (value.Equals(DBNull.Value)) return null;
+
+                return (DateTime?)value;
+            }
+            else if (type.FullName == typeof(DateTime).FullName)
+            {
+                if (value.Equals(DBNull.Value)) return DateTime.MinValue;
+
+                bool bo = DateTime.TryParse(value.ToString(), out DateTime result);
+
+                return bo ? result : DateTime.MinValue;
+            }
             else if (type.IsGenericType && type.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
             {
                 NullableConverter convertor = new NullableConverter(type);

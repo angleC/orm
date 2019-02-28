@@ -387,11 +387,11 @@ namespace MicroDust.Core.LambdaResolver
                 {
                     if (bool.TryParse(exp.Value.ToString(), out bool isTrue))
                     {
-                        value = "1";
+                        value = isTrue;
                     }
                     else
                     {
-                        value = "0";
+                        value = false;
                     }
                 }
             }
