@@ -107,7 +107,7 @@ namespace MicroDust.Core
             foreach (DataRow dr in dt.Rows)
             {
                 sbJson.Append("{");
-                foreach (PropertyInfo pi in obj.GetType().GetProperties())
+                foreach (PropertyInfo pi in obj.GetType().PropertyByASC())
                 {
                     columnName = pi.GetColumnName();
 
@@ -159,7 +159,7 @@ namespace MicroDust.Core
             this.sbSql.Append(ModelConvertor.ConvertToInsertSql<TSource>());
 
             Type t = entity.GetType();
-            PropertyInfo[] properties = t.GetProperties();
+            PropertyInfo[] properties = t.PropertyByASC();
 
             foreach (PropertyInfo pi in properties)
             {
@@ -171,6 +171,7 @@ namespace MicroDust.Core
 
             return this;
         }
+
         /// <summary>
         /// 添加实体数据到数据库
         /// </summary>
@@ -235,7 +236,7 @@ namespace MicroDust.Core
             long increment = 0;
             object proValue;
 
-            foreach (PropertyInfo pi in t.GetProperties())
+            foreach (PropertyInfo pi in t.PropertyByASC())
             {
                 columnName = pi.GetColumnName();
                 proValue = pi.GetValue(updateObj);
@@ -408,7 +409,7 @@ namespace MicroDust.Core
 
             Type t = updateObj.GetType();
 
-            foreach (PropertyInfo pi in t.GetProperties())
+            foreach (PropertyInfo pi in t.PropertyByASC())
             {
                 columnName = pi.GetColumnName();
 
@@ -465,7 +466,7 @@ namespace MicroDust.Core
             Type t = entity.GetType();
             string columnName = string.Empty;
 
-            foreach (PropertyInfo pi in t.GetProperties())
+            foreach (PropertyInfo pi in t.PropertyByASC())
             {
                 columnName = pi.GetColumnName();
                 if (pi.IsDefined(typeof(KeyAttribute)))
@@ -535,7 +536,7 @@ namespace MicroDust.Core
 
             Type tGroupBy = obj.GetType();
 
-            foreach (PropertyInfo pi in t.GetProperties())
+            foreach (PropertyInfo pi in t.PropertyByASC())
             {
                 if (!pi.ColumnIsIgnore())
                 {
@@ -616,7 +617,7 @@ namespace MicroDust.Core
             key = string.Empty;
             value = string.Empty;
 
-            foreach (PropertyInfo pi in t.GetProperties())
+            foreach (PropertyInfo pi in t.PropertyByASC())
             {
                 if (pi.IsDefined(typeof(KeyAttribute)))
                 {
@@ -633,7 +634,7 @@ namespace MicroDust.Core
         {
             Type t = typeof(TSource);
 
-            foreach (PropertyInfo pi in t.GetProperties())
+            foreach (PropertyInfo pi in t.PropertyByASC())
             {
                 if (pi.IsDefined(typeof(KeyAttribute)))
                 {

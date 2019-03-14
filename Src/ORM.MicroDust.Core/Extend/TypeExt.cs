@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -73,6 +74,17 @@ namespace MicroDust.Core
                 default:
                     return null;
             }
+        }
+        /// <summary>
+        /// 将属性字段按名称正序排列后返回
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static PropertyInfo[] PropertyByASC(this Type t)
+        {
+            PropertyInfo[] properties = t.GetProperties();
+
+            return properties.OrderBy(p => p.Name).ToArray();
         }
     }
 }

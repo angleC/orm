@@ -110,7 +110,7 @@ namespace MicroDust.Core
             string selectSql = string.Empty;
             Type t = typeof(T);
 
-            return $"INSERT INTO [{t.GetTableName()}] ({ConvertToFieldStr<T>()}) VALUES ({ConvertToFieldStr<T>("@")})";
+            return $"INSERT INTO [{t.GetTableName()}] ({ConvertToFieldStr<T>("[","]")}) VALUES ({ConvertToFieldStr<T>("@")})";
         }
         /// <summary>
         /// 修改sql字符串
@@ -137,7 +137,7 @@ namespace MicroDust.Core
             Type t = typeof(T);
             StringBuilder sbFieldStr = new StringBuilder();
 
-            foreach (PropertyInfo pi in t.GetProperties())
+            foreach (PropertyInfo pi in t.PropertyByASC())
             {
                 if (!pi.ColumnIsIgnore())
                 {
@@ -167,7 +167,7 @@ namespace MicroDust.Core
             int columnCount = reader.FieldCount;
             Type t = typeof(T);
 
-            PropertyInfo[] properties = t.GetProperties();
+            PropertyInfo[] properties = t.PropertyByASC();
             if (properties != null)
             {
                 List<string> readerFields = new List<string>();
