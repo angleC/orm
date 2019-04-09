@@ -175,7 +175,7 @@ namespace MicroDust.Core
         /// <returns></returns>
         public int Increment<T>(object updateObj) where T : class
         {
-            return this.Increment<T>(updateObj);
+            return this.Increment<T>(updateObj, string.Empty, null);
         }
         /// <summary>
         /// 修改增值字段,修改字段必须为int、long类型
